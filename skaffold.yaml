@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/jfrevert/spring-boot-test-jenkinsx:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/jfrevert/spring-boot-test-jenkinsx:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: spring-boot-test-jenkinsx
+        chartPath: charts/spring-boot-test-jenkinsx
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/jfrevert/spring-boot-test-jenkinsx'
+          image.tag: '{{.DIGEST_HEX}}'
